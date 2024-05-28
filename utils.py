@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 def process_video(input_path, output_path, detector):
     """
@@ -8,8 +9,15 @@ def process_video(input_path, output_path, detector):
         input_path (str): Path to the input video file.
         output_path (str): Path to save the output video file.
         detector (YOLODetector): Instance of YOLODetector for detection.
+    
+    Returns:
+        bool: True if processing was successful, False otherwise.
     """
     cap = cv2.VideoCapture(input_path)
+    if not cap.isOpened():
+        print(f"Error: Cannot open video file {input_path}")
+        return False
+
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -22,10 +30,11 @@ def process_video(input_path, output_path, detector):
             break
 
         detections = detector.detect(frame)
-        for _, row in detections.iterrows():
-            if row['name'] == 'person':
-                xmin, ymin, xmax, ymax, confidence = int(row['xmin']), int(row['ymin']), int(row['xmax']), int(row['ymax']), row['confidence']
-                label = f"{row['name']} {confidence:.2f}"
+        for detection in detections:
+            xmin, ymin, xmax, ymax, confidence, cls = detection
+            if int(cls) == 0:  # Class 0 is 'person' in COCO dataset
+                xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
+                label = f"person {confidence:.2f}"
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
                 cv2.putText(frame, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
@@ -34,3 +43,4 @@ def process_video(input_path, output_path, detector):
     cap.release()
     out.release()
     cv2.destroyAllWindows()
+    return True
