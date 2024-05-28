@@ -10,4 +10,4 @@ class YOLODetector:
     
     def detect(self, frame):
         results = self.model(frame)
-        return results.pandas().xyxy[0]
+        return results[0].boxes.data.cpu().numpy()
