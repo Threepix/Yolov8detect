@@ -4,6 +4,8 @@ This project performs people detection in a given video file using the YOLOv8 mo
 
 ## Setup
 
+Download crowd.mp4 from https://cloud.mail.ru/public/431z/MhGUAfGb2
+
 Install the required dependencies:
 ```bash
 pip install -r requirements.txt
